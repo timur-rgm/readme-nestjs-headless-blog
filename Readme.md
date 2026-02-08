@@ -1,7 +1,7 @@
 # Личный проект «Readme»
 
 * Студент: [Тимур Рагимов](https://up.htmlacademy.ru/nodejs-2-individual/2/user/2664215).
-* Наставник: `Неизвестно`.
+* Наставник: [Владислав Горшков](https://up.htmlacademy.ru/nodejs-2-individual/2/user/2682067).
 
 ---
 
