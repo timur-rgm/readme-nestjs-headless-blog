@@ -5,6 +5,30 @@
   "references": [
     {
       "path": "./apps/account"
+    },
+    {
+      "path": "./apps/api-gateway-e2e"
+    },
+    {
+      "path": "./apps/api-gateway"
+    },
+    {
+      "path": "./apps/blog-e2e"
+    },
+    {
+      "path": "./apps/blog"
+    },
+    {
+      "path": "./apps/notifications-e2e"
+    },
+    {
+      "path": "./apps/notifications"
+    },
+    {
+      "path": "./apps/files-e2e"
+    },
+    {
+      "path": "./apps/files"
     }
   ]
 }
