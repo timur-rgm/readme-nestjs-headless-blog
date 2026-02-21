@@ -41,6 +41,7 @@
   },
   "workspaces": [
     "apps/*",
-    "libs/shared/types"
+    "libs/shared/types",
+    "libs/shared/helpers"
   ]
 }
