@@ -9,6 +9,7 @@
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "axios": "^1.6.0",
+    "bcrypt": "5.1.1",
     "class-transformer": "0.5.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0"
@@ -28,6 +29,7 @@
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.5",
     "@swc/helpers": "~0.5.18",
+    "@types/bcrypt": "5.0.2",
     "@types/node": "20.19.9",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
