@@ -35,6 +35,9 @@
     },
     {
       "path": "./libs/shared/helpers"
+    },
+    {
+      "path": "./libs/shared/core"
     }
   ]
 }
