@@ -3,32 +3,13 @@
   "compileOnSave": false,
   "files": [],
   "references": [
-    {
-      "path": "./apps/account"
-    },
-    {
-      "path": "./apps/api-gateway-e2e"
-    },
-    {
-      "path": "./apps/api-gateway"
-    },
-    {
-      "path": "./apps/blog-e2e"
-    },
-    {
-      "path": "./apps/blog"
-    },
-    {
-      "path": "./apps/notifications-e2e"
-    },
-    {
-      "path": "./apps/notifications"
-    },
-    {
-      "path": "./apps/files-e2e"
-    },
-    {
-      "path": "./apps/files"
-    }
+    { "path": "./apps/account/tsconfig.json" },
+    { "path": "./apps/api-gateway/tsconfig.json" },
+    { "path": "./apps/blog/tsconfig.json" },
+    { "path": "./apps/files/tsconfig.json" },
+    { "path": "./apps/notifications/tsconfig.json" },
+    { "path": "./libs/shared/core/tsconfig.json" },
+    { "path": "./libs/shared/helpers/tsconfig.json" },
+    { "path": "./libs/shared/types/tsconfig.json" }
   ]
 }
