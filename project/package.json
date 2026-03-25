@@ -48,6 +48,7 @@
     "libs/shared/types",
     "libs/shared/helpers",
     "shared/*",
-    "libs/shared/*"
+    "libs/shared/*",
+    "libs/shared/config/*"
   ]
 }
