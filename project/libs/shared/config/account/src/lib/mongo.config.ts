@@ -43,4 +43,4 @@ const getConfig = (): MongoConfig =>
     authBase: process.env.MONGO_AUTH_BASE,
   });
 
-export default registerAs('db', getConfig);
+export default registerAs('mongo', getConfig);
