@@ -8,6 +8,8 @@ import type { AuthUser } from '@project/types';
   timestamps: true,
 })
 export class UserModel extends Document implements AuthUser {
+  public id!: string;
+
   @Prop({
     required: true,
     unique: true,

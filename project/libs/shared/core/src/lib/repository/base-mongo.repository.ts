@@ -18,7 +18,7 @@ export abstract class BaseMongoRepository<
     const createdDocument = new this.model(entity.convertToObject());
     await createdDocument.save();
 
-    entity.id = createdDocument._id.toString();
+    entity.id = createdDocument.id;
     return entity;
   }
 
