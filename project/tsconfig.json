@@ -4,31 +4,37 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/account/tsconfig.json"
+      "path": "./apps/account"
     },
     {
-      "path": "./apps/api-gateway/tsconfig.json"
+      "path": "./apps/api-gateway"
     },
     {
-      "path": "./apps/blog/tsconfig.json"
+      "path": "./apps/blog"
     },
     {
-      "path": "./apps/files/tsconfig.json"
+      "path": "./apps/files"
     },
     {
-      "path": "./apps/notifications/tsconfig.json"
+      "path": "./apps/notifications"
     },
     {
-      "path": "./libs/shared/core/tsconfig.json"
+      "path": "./libs/shared/core"
     },
     {
-      "path": "./libs/shared/helpers/tsconfig.json"
+      "path": "./libs/shared/helpers"
     },
     {
-      "path": "./libs/shared/types/tsconfig.json"
+      "path": "./libs/shared/types"
     },
     {
       "path": "./libs/shared/config/account"
+    },
+    {
+      "path": "./libs/blog/models"
+    },
+    {
+      "path": "./shared/blog/models"
     }
   ]
 }

@@ -53,6 +53,7 @@
     "libs/shared/helpers",
     "shared/*",
     "libs/shared/*",
-    "libs/shared/config/*"
+    "libs/shared/config/*",
+    "libs/blog/models"
   ]
 }
