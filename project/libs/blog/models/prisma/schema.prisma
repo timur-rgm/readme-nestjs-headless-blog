@@ -23,17 +23,18 @@ model Post {
   type PostType
   tags String[] @default([])
 
-  authorId String
+  authorId String @map("author_id")
 
-  linkUrl     String?
+  linkUrl     String? @map("link_url")
   description String?
   quote       String?
-  quoteAuthor String?
+  quoteAuthor String? @map("quote_author")
   title       String?
   announce    String?
   text        String?
-  photoUrl    String?
-  videoUrl    String?
+  photoUrl    String? @map("photo_url")
+  videoUrl    String? @map("video_url")
 
   @@index([title])
+  @@map("posts")
 }
