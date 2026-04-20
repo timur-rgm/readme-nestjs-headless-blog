@@ -9,3 +9,31 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum PostType {
+  Link  @map("link")
+  Quote @map("quote")
+  Photo @map("photo")
+  Text  @map("text")
+  Video @map("video")
+}
+
+model Post {
+  id   String   @id @default(uuid())
+  type PostType
+  tags String[] @default([])
+
+  authorId String
+
+  linkUrl     String?
+  description String?
+  quote       String?
+  quoteAuthor String?
+  title       String?
+  announce    String?
+  text        String?
+  photoUrl    String?
+  videoUrl    String?
+
+  @@index([title])
+}
