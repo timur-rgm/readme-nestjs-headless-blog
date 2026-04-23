@@ -35,9 +35,10 @@ model Post {
 
   authorId String    @map("author_id")
   comments Comment[]
+  likes    Like[]
 
-  @@index([title])
   @@map("posts")
+  @@index([title])
 }
 
 model Comment {
@@ -46,9 +47,24 @@ model Comment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   postId String @map("post_id")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String @map("user_id")
 
   @@map("comments")
+  @@index([postId])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  postId String @map("post_id")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @map("user_id")
+
+  @@map("likes")
+  @@unique([userId, postId])
+  @@index([postId])
 }
