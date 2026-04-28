@@ -1,1 +1,1 @@
-export * from './lib/models.js';
+export { PrismaClientModule } from './lib/prisma-client.module';
