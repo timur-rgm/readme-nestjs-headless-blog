@@ -10,7 +10,7 @@ export interface PostBase {
 export interface LinkPost extends PostBase {
   type: PostType.Link;
   linkUrl: string;
-  description: string;
+  description?: string;
 }
 
 export interface QuotePost extends PostBase {
