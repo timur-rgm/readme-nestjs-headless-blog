@@ -15,7 +15,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { fillRdo } from '@project/helpers';
 
 import { CommentNotFoundError, CommentOwnershipError } from './errors';
-import { CommentRdo } from './rdo/comment.rdo';
+import { CommentRdo } from './rdo';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { PostNotFoundError } from '../post/errors';
