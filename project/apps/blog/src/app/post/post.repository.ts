@@ -6,6 +6,7 @@ import { PrismaClientService } from '@project/models';
 import type { EntityId, Repository } from '@project/core';
 
 import { PostEntity } from './post.entity';
+import { PostQuery } from './query/post.query';
 
 const postTypeToPrismaPostType: Record<PostType, PrismaPostType> = {
   [PostType.Link]: PrismaPostType.Link,
@@ -37,15 +38,12 @@ export class PostRepository implements Repository<PostEntity> {
     return this.mapPostRowToPostEntity(existingPostRow);
   }
 
-  public async findAll(): Promise<PostEntity[]> {
+  public async findAll(query?: PostQuery): Promise<PostEntity[]> {
     const postRows = await this.prismaClientService.post.findMany();
     return postRows.map((postRow) => this.mapPostRowToPostEntity(postRow));
   }
 
-  public async update(
-    id: EntityId,
-    entity: PostEntity,
-  ): Promise<PostEntity> {
+  public async update(id: EntityId, entity: PostEntity): Promise<PostEntity> {
     const postData = entity.convertToObject();
     const updatedPostRow = await this.prismaClientService.post.update({
       where: { id },
