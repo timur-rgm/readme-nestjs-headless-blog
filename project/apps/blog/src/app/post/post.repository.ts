@@ -157,49 +157,47 @@ export class PostRepository implements Repository<PostEntity> {
   }
 
   private mapPostRowToPostEntity(prismaPost: PrismaPost): PostEntity {
+    const basePost = {
+      id: prismaPost.id,
+      createdAt: prismaPost.createdAt,
+      updatedAt: prismaPost.updatedAt,
+      tags: prismaPost.tags,
+      authorId: prismaPost.authorId,
+    };
+
     switch (prismaPost.type) {
       case PrismaPostType.Link:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Link,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           linkUrl: prismaPost.linkUrl!,
           description: prismaPost.description ?? undefined,
         });
       case PrismaPostType.Quote:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Quote,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           quote: prismaPost.quote!,
           quoteAuthor: prismaPost.quoteAuthor!,
         });
       case PrismaPostType.Photo:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Photo,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           photoUrl: prismaPost.photoUrl!,
         });
       case PrismaPostType.Text:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Text,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           title: prismaPost.title!,
           announce: prismaPost.announce!,
           text: prismaPost.text!,
         });
       case PrismaPostType.Video:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Video,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           title: prismaPost.title!,
           videoUrl: prismaPost.videoUrl!,
         });
