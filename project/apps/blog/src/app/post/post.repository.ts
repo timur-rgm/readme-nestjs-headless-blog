@@ -1,12 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { Post as PrismaPost, PostType as PrismaPostType } from '@prisma/client';
+import {
+  Prisma,
+  Post as PrismaPost,
+  PostType as PrismaPostType,
+} from '@prisma/client';
 
-import { PostType } from '@project/types';
+import { PaginationResult, PostType } from '@project/types';
 import { PrismaClientService } from '@project/models';
 import type { EntityId, Repository } from '@project/core';
 
 import { PostEntity } from './post.entity';
 import { PostQuery } from './query/post.query';
+import {
+  DEFAULT_POST_COUNT_LIMIT,
+  DEFAULT_POST_PAGE_COUNT,
+  DEFAULT_POST_SORT_DIRECTION,
+} from './post.constant';
 
 const postTypeToPrismaPostType: Record<PostType, PrismaPostType> = {
   [PostType.Link]: PrismaPostType.Link,
@@ -28,6 +37,42 @@ export class PostRepository implements Repository<PostEntity> {
     return this.mapPostRowToPostEntity(createdPostRow);
   }
 
+  public async findAll(
+    query?: PostQuery,
+  ): Promise<PaginationResult<PostEntity>> {
+    const {
+      limit = DEFAULT_POST_COUNT_LIMIT,
+      page = DEFAULT_POST_PAGE_COUNT,
+      sortDirection = DEFAULT_POST_SORT_DIRECTION,
+    } = query ?? {};
+
+    const where: Prisma.PostWhereInput = {};
+    const orderBy: Prisma.PostOrderByWithRelationInput = {
+      createdAt: sortDirection,
+    };
+    const skip = (page - 1) * limit;
+
+    const [postRows, totalItems] = await Promise.all([
+      this.prismaClientService.post.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      this.prismaClientService.post.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      entities: postRows.map((postRow) => this.mapPostRowToPostEntity(postRow)),
+      currentPage: page,
+      itemsPerPage: limit,
+      totalItems,
+      totalPages,
+    };
+  }
+
   public async findById(id: EntityId): Promise<PostEntity | null> {
     const existingPostRow = await this.prismaClientService.post.findUnique({
       where: { id },
@@ -36,11 +81,6 @@ export class PostRepository implements Repository<PostEntity> {
       return null;
     }
     return this.mapPostRowToPostEntity(existingPostRow);
-  }
-
-  public async findAll(query?: PostQuery): Promise<PostEntity[]> {
-    const postRows = await this.prismaClientService.post.findMany();
-    return postRows.map((postRow) => this.mapPostRowToPostEntity(postRow));
   }
 
   public async update(id: EntityId, entity: PostEntity): Promise<PostEntity> {
@@ -126,7 +166,7 @@ export class PostRepository implements Repository<PostEntity> {
           tags: prismaPost.tags,
           authorId: prismaPost.authorId,
           linkUrl: prismaPost.linkUrl!,
-          description: prismaPost.description!,
+          description: prismaPost.description ?? undefined,
         });
       case PrismaPostType.Quote:
         return new PostEntity({
