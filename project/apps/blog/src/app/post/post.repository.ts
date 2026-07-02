@@ -61,7 +61,6 @@ export class PostRepository implements Repository<PostEntity> {
       }),
       this.prismaClientService.post.count({ where }),
     ]);
-
     const totalPages = Math.ceil(totalItems / limit);
 
     return {

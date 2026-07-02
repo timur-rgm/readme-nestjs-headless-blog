@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
-import { PostType } from '@project/types';
+import { PaginationResult, PostType } from '@project/types';
 
 import type { CreatePostDto } from './dto/create-post.dto';
 import { PostEntity } from './post.entity';
 import { POST_EXISTS, POST_NOT_FOUND } from './post.constant';
 import { PostExistsError, PostNotFoundError } from './errors';
+import { PostQuery } from './query/post.query';
 import { PostRepository } from './post.repository';
 
 @Injectable()
@@ -24,8 +25,10 @@ export class PostService {
     return this.postRepository.save(postEntity);
   }
 
-  public async getAll(): Promise<PostEntity[]> {
-    return this.postRepository.findAll();
+  public async getAll(
+    query?: PostQuery,
+  ): Promise<PaginationResult<PostEntity>> {
+    return this.postRepository.findAll(query);
   }
 
   public async getById(id: string): Promise<PostEntity> {

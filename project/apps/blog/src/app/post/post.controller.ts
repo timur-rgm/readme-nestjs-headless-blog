@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiExtraModels,
@@ -23,11 +24,13 @@ import {
   LinkPostRdo,
   QuotePostRdo,
   PhotoPostRdo,
+  PostListRdo,
   PostRdo,
   TextPostRdo,
   VideoPostRdo,
 } from './rdo';
 import { PostExistsError, PostNotFoundError } from './errors';
+import { PostQuery } from './query/post.query';
 import { PostService } from './post.service';
 
 @Controller('posts')
@@ -35,6 +38,7 @@ import { PostService } from './post.service';
   LinkPostRdo,
   QuotePostRdo,
   PhotoPostRdo,
+  PostListRdo,
   TextPostRdo,
   VideoPostRdo,
 )
@@ -71,25 +75,14 @@ export class PostController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Post list',
-    schema: {
-      type: 'array',
-      items: {
-        oneOf: [
-          { $ref: getSchemaPath(LinkPostRdo) },
-          { $ref: getSchemaPath(QuotePostRdo) },
-          { $ref: getSchemaPath(TextPostRdo) },
-          { $ref: getSchemaPath(PhotoPostRdo) },
-          { $ref: getSchemaPath(VideoPostRdo) },
-        ],
-      },
-    },
+    type: PostListRdo,
   })
-  public async getAll() {
-    const posts = await this.postService.getAll();
-    return fillRdo(
-      PostRdo,
-      posts.map((post) => post.convertToObject()),
-    );
+  public async getAll(@Query() query?: PostQuery) {
+    const posts = await this.postService.getAll(query);
+    return fillRdo(PostListRdo, {
+      ...posts,
+      entities: posts.entities.map((post) => post.convertToObject()),
+    });
   }
 
   @Get('/:id')
