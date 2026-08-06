@@ -27,7 +27,7 @@ const validateConfig = (config: unknown): MongoConfig => {
   });
 
   if (error) {
-    throw new Error(`[DB Config Validation Error]: ${error.message}`);
+    throw new Error(`[Account Mongo Config Validation Error]: ${error.message}`);
   }
 
   return value;
