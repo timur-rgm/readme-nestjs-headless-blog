@@ -27,6 +27,7 @@ export class UserEntity implements AuthUser, Entity<string, AuthUser> {
   }
 
   public fillFromObject(user: AuthUser): void {
+    this.id = user.id;
     this.email = user.email;
     this.name = user.name;
     this.avatarUrl = user.avatarUrl;

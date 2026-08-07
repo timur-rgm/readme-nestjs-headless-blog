@@ -13,6 +13,6 @@ export type {
   VideoPost,
 } from './lib/post.interface';
 export { SortDirection } from './lib/sort-direction.enum';
-export type { Token } from './lib/token.interface';
+export type { TokenPair } from './lib/token.interface';
 export type { TokenPayload } from './lib/token-payload.interface';
 export type { User } from './lib/user.interface';

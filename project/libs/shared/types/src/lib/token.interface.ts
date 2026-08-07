@@ -1,4 +1,4 @@
-export interface Token {
+export interface TokenPair {
   accessToken: string;
   refreshToken: string;
 }
