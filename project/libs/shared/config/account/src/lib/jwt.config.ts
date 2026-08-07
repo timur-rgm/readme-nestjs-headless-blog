@@ -1,11 +1,12 @@
 import { registerAs } from '@nestjs/config';
 import * as Joi from 'joi';
+import { StringValue } from 'ms';
 
 export interface JwtConfig {
   accessTokenSecret: string;
-  accessTokenExpiresIn: string;
+  accessTokenExpiresIn: StringValue;
   refreshTokenSecret: string;
-  refreshTokenExpiresIn: string;
+  refreshTokenExpiresIn: StringValue;
 }
 
 const validationSchema: Joi.ObjectSchema<JwtConfig> = Joi.object({
