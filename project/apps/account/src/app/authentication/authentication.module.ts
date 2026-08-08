@@ -7,6 +7,7 @@ import { getJwtOptions } from '@project/config-account';
 
 import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './authentication.service';
+import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { UserModel, UserSchema } from './user.model';
 import { UserRepository } from './user.repository';
 
@@ -14,11 +15,11 @@ import { UserRepository } from './user.repository';
   imports: [
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: getJwtOptions
+      useFactory: getJwtOptions,
     }),
     MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
   ],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService, UserRepository],
+  providers: [AuthenticationService, JwtAccessStrategy, UserRepository],
 })
 export class AuthenticationModule {}

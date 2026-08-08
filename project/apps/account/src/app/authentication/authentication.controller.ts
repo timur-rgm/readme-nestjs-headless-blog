@@ -10,22 +10,22 @@ import {
   Param,
   Post,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 
 import { fillRdo } from '@project/helpers';
 import { MongoIdValidationPipe } from '@project/core';
 
 import { AuthenticationService } from './authentication.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
+import { CreateUserDto, LoginUserDto } from './dto';
+import { JwtAccessGuard } from './guards/jwt-access.guard';
 import {
   TokenGenerationError,
   UserExistsError,
   UserNotFoundError,
   UserWrongPasswordError,
 } from './errors';
-import { TokenPairRdo } from './rdo/token-pair.rdo';
-import { UserRdo } from './rdo/user.rdo';
+import { TokenPairRdo, UserRdo } from './rdo';
 
 @ApiTags('authentication')
 @Controller('auth')
@@ -64,12 +64,13 @@ export class AuthenticationController {
     }
   }
 
+  @Get(':id')
+  @UseGuards(JwtAccessGuard)
   @ApiResponse({
     type: UserRdo,
     status: HttpStatus.OK,
     description: 'User found',
   })
-  @Get(':id')
   public async getById(
     @Param('id', MongoIdValidationPipe) id: string,
   ): Promise<UserRdo> {
