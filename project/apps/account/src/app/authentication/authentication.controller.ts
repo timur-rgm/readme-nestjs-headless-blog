@@ -18,7 +18,7 @@ import { MongoIdValidationPipe } from '@project/core';
 
 import { AuthenticationService } from './authentication.service';
 import { CreateUserDto, LoginUserDto } from './dto';
-import { JwtAccessGuard } from './guards/jwt-access.guard';
+import { JwtAccessGuard } from './guards';
 import {
   TokenGenerationError,
   UserExistsError,
