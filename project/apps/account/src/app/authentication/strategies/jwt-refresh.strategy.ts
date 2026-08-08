@@ -6,15 +6,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import type { TokenPayload } from '@project/types';
 
 @Injectable()
-export class JwtAccessStrategy extends PassportStrategy(
+export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
-  'jwt-access',
+  'jwt-refresh',
 ) {
   constructor(configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.getOrThrow<string>('jwt.accessTokenSecret'),
+      secretOrKey: configService.getOrThrow<string>('jwt.refreshTokenSecret'),
     });
   }
 
