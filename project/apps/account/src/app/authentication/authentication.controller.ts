@@ -9,16 +9,19 @@ import {
   NotFoundException,
   Param,
   Post,
+  Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 
 import { fillRdo } from '@project/helpers';
 import { MongoIdValidationPipe } from '@project/core';
+import type { Request } from 'express';
+import type { TokenPayload } from '@project/types';
 
 import { AuthenticationService } from './authentication.service';
 import { CreateUserDto, LoginUserDto } from './dto';
-import { JwtAccessGuard } from './guards';
+import { JwtAccessGuard, JwtRefreshGuard } from './guards';
 import {
   TokenGenerationError,
   UserExistsError,
@@ -58,7 +61,32 @@ export class AuthenticationController {
   })
   public async login(@Body() dto: LoginUserDto): Promise<TokenPairRdo> {
     try {
-      return this.authorizationService.login(dto);
+      const tokenPair = await this.authorizationService.login(dto);
+      return fillRdo(TokenPairRdo, tokenPair);
+    } catch (error) {
+      this.mapAuthErrorToHttp(error);
+    }
+  }
+
+  @Post('refresh-token')
+  @UseGuards(JwtRefreshGuard)
+  @ApiResponse({
+    type: TokenPairRdo,
+    status: HttpStatus.OK,
+    description: 'Tokens have been successfully refreshed.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Refresh token is invalid or expired.',
+  })
+  public async refreshToken(
+    @Req() request: Request & { user: TokenPayload },
+  ): Promise<TokenPairRdo> {
+    try {
+      const tokenPair = await this.authorizationService.refreshToken(
+        request.user,
+      );
+      return fillRdo(TokenPairRdo, tokenPair);
     } catch (error) {
       this.mapAuthErrorToHttp(error);
     }

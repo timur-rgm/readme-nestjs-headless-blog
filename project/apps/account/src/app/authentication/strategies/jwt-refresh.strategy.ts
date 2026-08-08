@@ -18,7 +18,10 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  public async validate(payload: TokenPayload) {
-    return payload;
+  public async validate(payload: TokenPayload): Promise<TokenPayload> {
+    return {
+      sub: payload.sub,
+      email: payload.email,
+    };
   }
 }

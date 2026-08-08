@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { StringValue } from 'ms';
 
-import type { TokenPair, TokenPayload, User } from '@project/types';
+import type { TokenPair, TokenPayload } from '@project/types';
 
 import {
   AUTH_TOKEN_GENERATION_FAILED,
@@ -53,7 +53,15 @@ export class AuthenticationService {
 
   public async login(dto: LoginUserDto): Promise<TokenPair> {
     const userEntity = await this.verify(dto);
-    return this.createTokenPair(userEntity);
+    const tokenPayload = {
+      sub: userEntity.id!,
+      email: userEntity.email,
+    };
+    return this.createTokenPair(tokenPayload);
+  }
+
+  public async refreshToken(tokenPayload: TokenPayload): Promise<TokenPair> {
+    return this.createTokenPair(tokenPayload);
   }
 
   public async getById(id: string): Promise<UserEntity> {
@@ -80,23 +88,18 @@ export class AuthenticationService {
     return userEntity;
   }
 
-  private async createTokenPair(user: User): Promise<TokenPair> {
-    const payload: TokenPayload = {
-      sub: user.id!,
-      email: user.email,
-    };
-
-    console.log(user, payload);
-
+  private async createTokenPair(
+    tokenPayload: TokenPayload,
+  ): Promise<TokenPair> {
     try {
-      const accessToken = await this.jwtService.signAsync(payload);
+      const accessToken = await this.jwtService.signAsync(tokenPayload);
       const refreshTokenSecret = this.configService.getOrThrow<string>(
         'jwt.refreshTokenSecret',
       );
       const refreshTokenExpiresIn = this.configService.getOrThrow<StringValue>(
         'jwt.refreshTokenExpiresIn',
       );
-      const refreshToken = await this.jwtService.signAsync(payload, {
+      const refreshToken = await this.jwtService.signAsync(tokenPayload, {
         secret: refreshTokenSecret,
         expiresIn: refreshTokenExpiresIn,
       });
