@@ -21,13 +21,16 @@ export class UserModel extends Document implements AuthUser {
   })
   public name!: string;
 
+  @Prop()
+  public avatar?: string;
+
   @Prop({
     required: true,
   })
   public passwordHash!: string;
 
   @Prop()
-  public avatar?: string;
+  public refreshToken?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

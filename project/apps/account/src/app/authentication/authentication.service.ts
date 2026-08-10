@@ -6,6 +6,7 @@ import type { StringValue } from 'ms';
 import type { TokenPair, TokenPayload } from '@project/types';
 
 import {
+  AUTH_REFRESH_TOKEN_INVALID,
   AUTH_TOKEN_GENERATION_FAILED,
   AUTH_UNKNOWN_TOKEN_GENERATION_ERROR,
   AUTH_USER_EXISTS,
@@ -16,6 +17,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserEntity } from './user.entity';
 import {
+  RefreshTokenInvalidError,
   TokenGenerationError,
   UserExistsError,
   UserNotFoundError,
@@ -57,11 +59,30 @@ export class AuthenticationService {
       sub: userEntity.id!,
       email: userEntity.email,
     };
-    return this.createTokenPair(tokenPayload);
+    const tokenPair = await this.createTokenPair(tokenPayload);
+    await this.userRepository.updateRefreshToken(
+      userEntity.id!,
+      tokenPair.refreshToken,
+    );
+    return tokenPair;
   }
 
-  public async refreshToken(tokenPayload: TokenPayload): Promise<TokenPair> {
-    return this.createTokenPair(tokenPayload);
+  public async refreshToken(
+    tokenPayload: TokenPayload,
+    refreshToken: string,
+  ): Promise<TokenPair> {
+    const userEntity = await this.getById(tokenPayload.sub);
+
+    if (userEntity.refreshToken !== refreshToken) {
+      throw new RefreshTokenInvalidError(AUTH_REFRESH_TOKEN_INVALID);
+    }
+
+    const tokenPair = await this.createTokenPair(tokenPayload);
+    await this.userRepository.updateRefreshToken(
+      userEntity.id!,
+      tokenPair.refreshToken,
+    );
+    return tokenPair;
   }
 
   public async getById(id: string): Promise<UserEntity> {

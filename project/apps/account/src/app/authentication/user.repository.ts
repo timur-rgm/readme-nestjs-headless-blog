@@ -17,4 +17,16 @@ export class UserRepository extends BaseMongoRepository<UserEntity, UserModel> {
     const document = await this.model.findOne({ email }).exec();
     return this.createEntityFromDocument(document);
   }
+
+  public async updateRefreshToken(
+    id: string,
+    refreshToken?: string,
+  ): Promise<void> {
+    const update =
+      refreshToken === undefined
+        ? { $unset: { refreshToken: 1 } }
+        : { $set: { refreshToken } };
+
+    await this.model.findByIdAndUpdate(id, update).exec();
+  }
 }

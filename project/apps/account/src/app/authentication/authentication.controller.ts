@@ -4,6 +4,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Headers,
   HttpStatus,
   InternalServerErrorException,
   NotFoundException,
@@ -23,6 +24,7 @@ import { AuthenticationService } from './authentication.service';
 import { CreateUserDto, LoginUserDto } from './dto';
 import { JwtAccessGuard, JwtRefreshGuard } from './guards';
 import {
+  RefreshTokenInvalidError,
   TokenGenerationError,
   UserExistsError,
   UserNotFoundError,
@@ -80,11 +82,14 @@ export class AuthenticationController {
     description: 'Refresh token is invalid or expired.',
   })
   public async refreshToken(
+    @Headers('authorization') authorization: string,
     @Req() request: Request & { user: TokenPayload },
   ): Promise<TokenPairRdo> {
     try {
+      const refreshToken = authorization.replace('Bearer ', '');
       const tokenPair = await this.authorizationService.refreshToken(
         request.user,
+        refreshToken,
       );
       return fillRdo(TokenPairRdo, tokenPair);
     } catch (error) {
@@ -111,6 +116,9 @@ export class AuthenticationController {
   }
 
   private mapAuthErrorToHttp(error: unknown): never {
+    if (error instanceof RefreshTokenInvalidError) {
+      throw new UnauthorizedException(error.message);
+    }
     if (error instanceof TokenGenerationError) {
       throw new InternalServerErrorException(error.message);
     }

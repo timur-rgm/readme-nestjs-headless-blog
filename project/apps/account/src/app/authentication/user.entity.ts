@@ -11,6 +11,7 @@ export class UserEntity implements AuthUser, Entity<string, AuthUser> {
   public name!: string;
   public avatarUrl?: string;
   public passwordHash!: string;
+  public refreshToken?: string;
 
   constructor(user: AuthUser) {
     this.fillFromObject(user);
@@ -23,6 +24,7 @@ export class UserEntity implements AuthUser, Entity<string, AuthUser> {
       name: this.name,
       avatarUrl: this.avatarUrl,
       passwordHash: this.passwordHash,
+      refreshToken: this.refreshToken,
     };
   }
 
@@ -32,6 +34,7 @@ export class UserEntity implements AuthUser, Entity<string, AuthUser> {
     this.name = user.name;
     this.avatarUrl = user.avatarUrl;
     this.passwordHash = user.passwordHash;
+    this.refreshToken = user.refreshToken;
   }
 
   public async setPassword(password: string): Promise<UserEntity> {
