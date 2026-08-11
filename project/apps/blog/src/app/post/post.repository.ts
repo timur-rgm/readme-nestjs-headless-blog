@@ -12,9 +12,9 @@ import type { EntityId, Repository } from '@project/core';
 import { PostEntity } from './post.entity';
 import { PostQuery } from './query/post.query';
 import {
-  DEFAULT_POST_COUNT_LIMIT,
-  DEFAULT_POST_PAGE_COUNT,
-  DEFAULT_POST_SORT_DIRECTION,
+  POST_DEFAULT_LIMIT,
+  POST_DEFAULT_PAGE,
+  POST_DEFAULT_SORT_DIRECTION,
 } from './post.constant';
 
 const postTypeToPrismaPostType: Record<PostType, PrismaPostType> = {
@@ -41,9 +41,9 @@ export class PostRepository implements Repository<PostEntity> {
     query?: PostQuery,
   ): Promise<PaginationResult<PostEntity>> {
     const {
-      limit = DEFAULT_POST_COUNT_LIMIT,
-      page = DEFAULT_POST_PAGE_COUNT,
-      sortDirection = DEFAULT_POST_SORT_DIRECTION,
+      limit = POST_DEFAULT_LIMIT,
+      page = POST_DEFAULT_PAGE,
+      sortDirection = POST_DEFAULT_SORT_DIRECTION,
     } = query ?? {};
 
     const where: Prisma.PostWhereInput = {};

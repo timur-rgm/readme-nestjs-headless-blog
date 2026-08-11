@@ -1,16 +1,19 @@
 import { Transform } from 'class-transformer';
-import { IsIn, IsNumber, IsOptional } from 'class-validator';
+import { IsIn, IsInt, IsOptional, Max } from 'class-validator';
 
 import { SortDirection } from '@project/types';
 
+import { POST_MAX_LIMIT } from '../post.constant';
+
 export class PostQuery {
   @Transform(({ value }) => Number(value))
-  @IsNumber()
+  @IsInt()
+  @Max(POST_MAX_LIMIT)
   @IsOptional()
   public limit?: number;
 
   @Transform(({ value }) => Number(value))
-  @IsNumber()
+  @IsInt()
   @IsOptional()
   public page?: number;
 
