@@ -62,7 +62,7 @@ export class PostController {
   })
   public async create(
     @Body(new CreatePostValidationPipe()) dto: CreatePostDto,
-  ) {
+  ): Promise<PostRdo> {
     try {
       const post = await this.postService.create(dto, 'test-author-id');
       return fillRdo(PostRdo, post.convertToObject());
@@ -77,7 +77,7 @@ export class PostController {
     description: 'Post list',
     type: PostListRdo,
   })
-  public async getAll(@Query() query?: PostQuery) {
+  public async getAll(@Query() query?: PostQuery): Promise<PostListRdo> {
     const posts = await this.postService.getAll(query);
     return fillRdo(PostListRdo, {
       ...posts,
@@ -99,7 +99,7 @@ export class PostController {
       ],
     },
   })
-  public async getById(@Param('id') id: string) {
+  public async getById(@Param('id') id: string): Promise<PostRdo> {
     try {
       const post = await this.postService.getById(id);
       return fillRdo(PostRdo, post.convertToObject());
