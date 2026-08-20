@@ -1,8 +1,16 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, Max, Min } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsMongoId,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
-import { SortDirection } from '@project/types';
+import { PostType, SortDirection } from '@project/types';
 
 import { POST_MAX_LIMIT } from '../post.constant';
 
@@ -39,4 +47,29 @@ export class PostQuery {
     example: SortDirection.Desc,
   })
   public sortDirection?: SortDirection;
+
+  @IsMongoId()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Post author ID',
+    example: '69d210c70ca335bbad96f91c',
+  })
+  authorId?: string;
+
+  @IsString()
+  @IsOptional()
+  tag?: string;
+
+  @IsIn(Object.values(PostType))
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Post tag',
+    example: 'nestjs',
+  })
+  @ApiPropertyOptional({
+    description: 'Post type',
+    enum: PostType,
+    example: PostType.Photo,
+  })
+  type?: PostType;
 }
