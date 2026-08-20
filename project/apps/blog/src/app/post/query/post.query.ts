@@ -11,7 +11,7 @@ import {
   Min,
 } from 'class-validator';
 
-import { PostType, SortDirection } from '@project/types';
+import { PostSortBy, PostType, SortDirection } from '@project/types';
 
 import { POST_MAX_LIMIT } from '../post.constant';
 
@@ -39,6 +39,15 @@ export class PostQuery {
     minimum: 1,
   })
   public page?: number;
+
+  @IsIn(Object.values(PostSortBy))
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Post sorting criterion',
+    enum: PostSortBy,
+    example: PostSortBy.CreatedAt,
+  })
+  public sortBy?: PostSortBy;
 
   @IsIn(Object.values(SortDirection))
   @IsOptional()
