@@ -5,7 +5,12 @@ import {
   PostType as PrismaPostType,
 } from '@prisma/client';
 
-import { PaginationResult, PostType } from '@project/types';
+import {
+  PaginationResult,
+  PostSortBy,
+  PostType,
+  SortDirection,
+} from '@project/types';
 import { PrismaClientService } from '@project/models';
 import type { EntityId, Repository } from '@project/core';
 
@@ -14,6 +19,7 @@ import { PostQuery } from './query/post.query';
 import {
   POST_DEFAULT_LIMIT,
   POST_DEFAULT_PAGE,
+  POST_DEFAULT_SORT_BY,
   POST_DEFAULT_SORT_DIRECTION,
 } from './post.constant';
 
@@ -23,6 +29,19 @@ const postTypeToPrismaPostType: Record<PostType, PrismaPostType> = {
   [PostType.Photo]: PrismaPostType.Photo,
   [PostType.Text]: PrismaPostType.Text,
   [PostType.Video]: PrismaPostType.Video,
+};
+
+const postSortByToPrismaOrderBy: Record<
+  PostSortBy,
+  (sortDirection: SortDirection) => Prisma.PostOrderByWithRelationInput
+> = {
+  [PostSortBy.CreatedAt]: (sortDirection) => ({ createdAt: sortDirection }),
+  [PostSortBy.Comments]: (sortDirection) => ({
+    comments: { _count: sortDirection },
+  }),
+  [PostSortBy.Likes]: (sortDirection) => ({
+    likes: { _count: sortDirection },
+  }),
 };
 
 @Injectable()
@@ -43,6 +62,7 @@ export class PostRepository implements Repository<PostEntity> {
     const {
       limit = POST_DEFAULT_LIMIT,
       page = POST_DEFAULT_PAGE,
+      sortBy = POST_DEFAULT_SORT_BY,
       sortDirection = POST_DEFAULT_SORT_DIRECTION,
       authorId,
       tag,
@@ -54,9 +74,9 @@ export class PostRepository implements Repository<PostEntity> {
       ...(tag && { tags: { has: tag } }),
       ...(type && { type: postTypeToPrismaPostType[type] }),
     };
-    const orderBy: Prisma.PostOrderByWithRelationInput = {
-      createdAt: sortDirection,
-    };
+
+    const orderBy: Prisma.PostOrderByWithRelationInput =
+      postSortByToPrismaOrderBy[sortBy](sortDirection);
 
     const skip = (page - 1) * limit;
 
@@ -69,6 +89,7 @@ export class PostRepository implements Repository<PostEntity> {
       }),
       this.prismaClientService.post.count({ where }),
     ]);
+
     const totalPages = Math.ceil(totalItems / limit);
 
     return {
