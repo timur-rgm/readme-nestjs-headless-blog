@@ -44,20 +44,30 @@ export class PostRepository implements Repository<PostEntity> {
       limit = POST_DEFAULT_LIMIT,
       page = POST_DEFAULT_PAGE,
       sortDirection = POST_DEFAULT_SORT_DIRECTION,
+      authorId,
+      tag,
+      type,
     } = query ?? {};
 
+    const where: Prisma.PostWhereInput = {
+      authorId,
+      ...(tag && { tags: { has: tag } }),
+      ...(type && { type: postTypeToPrismaPostType[type] }),
+    };
     const orderBy: Prisma.PostOrderByWithRelationInput = {
       createdAt: sortDirection,
     };
+
     const skip = (page - 1) * limit;
 
     const [postRows, totalItems] = await Promise.all([
       this.prismaClientService.post.findMany({
+        where,
         orderBy,
         skip,
         take: limit,
       }),
-      this.prismaClientService.post.count(),
+      this.prismaClientService.post.count({ where }),
     ]);
     const totalPages = Math.ceil(totalItems / limit);
 

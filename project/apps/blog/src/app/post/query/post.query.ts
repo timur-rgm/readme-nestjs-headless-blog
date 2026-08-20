@@ -4,6 +4,7 @@ import {
   IsIn,
   IsInt,
   IsMongoId,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Max,
@@ -57,15 +58,16 @@ export class PostQuery {
   authorId?: string;
 
   @IsString()
-  @IsOptional()
-  tag?: string;
-
-  @IsIn(Object.values(PostType))
+  @IsNotEmpty()
   @IsOptional()
   @ApiPropertyOptional({
     description: 'Post tag',
     example: 'nestjs',
   })
+  tag?: string;
+
+  @IsIn(Object.values(PostType))
+  @IsOptional()
   @ApiPropertyOptional({
     description: 'Post type',
     enum: PostType,

@@ -19,6 +19,13 @@ export class PostRdo {
   })
   public type!: PostType;
 
+  @Expose()
+  @ApiProperty({
+    description: 'Post author ID',
+    example: '69d210c70ca335bbad96f91c',
+  })
+  public authorId!: string;
+
   @ApiProperty({
     description: 'Post creation date',
     example: '2026-05-12T18:48:00.000Z',
