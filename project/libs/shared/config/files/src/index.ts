@@ -1,1 +1,1 @@
-export * from './lib/config-files.module';
+export { ConfigFilesModule } from './lib/config-files.module';
