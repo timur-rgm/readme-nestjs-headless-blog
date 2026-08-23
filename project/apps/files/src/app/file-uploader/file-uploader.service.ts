@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { Injectable, Logger } from '@nestjs/common';
 import dayjs from 'dayjs';
 import { ensureDir } from 'fs-extra';
+import { extension } from 'mime-types';
 import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
 
 @Injectable()
@@ -13,8 +15,14 @@ export class FileUploaderService {
   constructor(private readonly configService: ConfigService) {}
 
   public async saveFile(file: Express.Multer.File): Promise<string> {
+    const fileExtension = extension(file.mimetype);
+    const filename = `${randomUUID()}.${fileExtension}`;
+
     const uploadDirectoryPath = this.getUploadDirectoryPath();
-    const destinationFilePath = this.getDestinationFilePath(file.originalname);
+    const destinationFilePath = this.getDestinationFilePath(
+      uploadDirectoryPath,
+      filename,
+    );
 
     try {
       await ensureDir(uploadDirectoryPath);
@@ -37,7 +45,10 @@ export class FileUploaderService {
     return join(uploadDirectory, year, month);
   }
 
-  private getDestinationFilePath(filename: string): string {
-    return join(this.getUploadDirectoryPath(), filename);
+  private getDestinationFilePath(
+    uploadDirectoryPath: string,
+    filename: string,
+  ): string {
+    return join(uploadDirectoryPath, filename);
   }
 }
