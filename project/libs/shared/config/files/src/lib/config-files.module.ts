@@ -2,6 +2,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 
 import filesConfig from './files.config';
+import mongoConfig from './mongo.config';
 
 const ENV_FILE_PATH = 'apps/files/files.env';
 
@@ -10,7 +11,7 @@ const ENV_FILE_PATH = 'apps/files/files.env';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [filesConfig],
+      load: [filesConfig, mongoConfig],
       envFilePath: ENV_FILE_PATH,
     }),
   ],
