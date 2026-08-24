@@ -1,5 +1,5 @@
 import 'multer';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   BadRequestException,
   Controller,
@@ -27,6 +27,19 @@ export class FileUploaderController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @ApiResponse({
     type: UploadedFileRdo,
     status: HttpStatus.CREATED,

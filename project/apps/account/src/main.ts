@@ -19,6 +19,7 @@ async function bootstrap() {
     .setTitle('The «Account» service')
     .setDescription('Account service API')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('spec', app, document);

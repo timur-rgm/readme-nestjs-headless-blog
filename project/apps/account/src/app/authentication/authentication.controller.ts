@@ -1,4 +1,4 @@
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   ConflictException,
@@ -39,8 +39,13 @@ export class AuthenticationController {
 
   @Post('register')
   @ApiResponse({
+    type: UserRdo,
     status: HttpStatus.CREATED,
     description: 'The new user has been successfully created.',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'User with this email already exists.',
   })
   public async register(@Body() dto: CreateUserDto): Promise<UserRdo> {
     try {
@@ -72,6 +77,7 @@ export class AuthenticationController {
 
   @Post('refresh-token')
   @UseGuards(JwtRefreshGuard)
+  @ApiBearerAuth()
   @ApiResponse({
     type: TokenPairRdo,
     status: HttpStatus.OK,
@@ -99,10 +105,15 @@ export class AuthenticationController {
 
   @Get(':id')
   @UseGuards(JwtAccessGuard)
+  @ApiBearerAuth()
   @ApiResponse({
     type: UserRdo,
     status: HttpStatus.OK,
     description: 'User found',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'User not found.',
   })
   public async getById(
     @Param('id', MongoIdValidationPipe) id: string,

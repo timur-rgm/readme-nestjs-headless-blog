@@ -60,6 +60,10 @@ export class PostController {
       ],
     },
   })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Post already exists.',
+  })
   public async create(
     @Body(new CreatePostValidationPipe()) dto: CreatePostDto,
   ): Promise<PostRdo> {
@@ -98,6 +102,10 @@ export class PostController {
         { $ref: getSchemaPath(VideoPostRdo) },
       ],
     },
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Post not found.',
   })
   public async getById(@Param('id') id: string): Promise<PostRdo> {
     try {
