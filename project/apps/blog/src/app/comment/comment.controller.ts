@@ -9,13 +9,15 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { fillRdo } from '@project/helpers';
 
 import { CommentNotFoundError, CommentOwnershipError } from './errors';
-import { CommentRdo } from './rdo/comment.rdo';
+import { CommentQuery } from './query/comment.query';
+import { CommentListRdo, CommentRdo } from './rdo';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { PostNotFoundError } from '../post/errors';
@@ -40,7 +42,7 @@ export class CommentController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Comment list',
-    type: [CommentRdo],
+    type: CommentListRdo,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -48,13 +50,19 @@ export class CommentController {
   })
   public async getByPostId(
     @Param('postId') postId: string,
-  ): Promise<CommentRdo[]> {
+    @Query() query?: CommentQuery,
+  ): Promise<CommentListRdo> {
     try {
-      const commentEntities = await this.commentService.getByPostId(postId);
-      const commentObjects = commentEntities.map((entity) =>
-        entity.convertToObject(),
+      const commentPaginationResult = await this.commentService.getByPostId(
+        postId,
+        query,
       );
-      return fillRdo(CommentRdo, commentObjects);
+      return fillRdo(CommentListRdo, {
+        ...commentPaginationResult,
+        entities: commentPaginationResult.entities.map((entity) =>
+          entity.convertToObject(),
+        ),
+      });
     } catch (error) {
       this.mapErrorToHttp(error);
     }

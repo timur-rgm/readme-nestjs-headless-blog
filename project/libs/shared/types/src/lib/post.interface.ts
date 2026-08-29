@@ -5,12 +5,14 @@ export interface PostBase {
   type: PostType;
   tags?: string[];
   authorId: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface LinkPost extends PostBase {
   type: PostType.Link;
   linkUrl: string;
-  description: string;
+  description?: string;
 }
 
 export interface QuotePost extends PostBase {

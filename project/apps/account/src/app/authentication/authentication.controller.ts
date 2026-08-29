@@ -1,50 +1,64 @@
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   ConflictException,
   Controller,
   Get,
+  Headers,
   HttpStatus,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
+  Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { fillRdo } from '@project/helpers';
+import { MongoIdValidationPipe } from '@project/core';
+import type { Request } from 'express';
+import type { TokenPayload } from '@project/types';
 
 import { AuthenticationService } from './authentication.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { LoggedUserRdo } from './rdo/logged-user.rdo';
-import { LoginUserDto } from './dto/login-user.dto';
+import { CreateUserDto, LoginUserDto } from './dto';
+import { JwtAccessGuard, JwtRefreshGuard } from './guards';
 import {
+  RefreshTokenInvalidError,
+  TokenGenerationError,
   UserExistsError,
   UserNotFoundError,
   UserWrongPasswordError,
 } from './errors';
-import { UserRdo } from './rdo/user.rdo';
+import { TokenPairRdo, UserRdo } from './rdo';
 
 @ApiTags('authentication')
 @Controller('auth')
 export class AuthenticationController {
   constructor(private readonly authorizationService: AuthenticationService) {}
 
+  @Post('register')
   @ApiResponse({
+    type: UserRdo,
     status: HttpStatus.CREATED,
     description: 'The new user has been successfully created.',
   })
-  @Post('register')
-  public async register(@Body() dto: CreateUserDto) {
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'User with this email already exists.',
+  })
+  public async register(@Body() dto: CreateUserDto): Promise<UserRdo> {
     try {
-      const user = await this.authorizationService.register(dto);
-      return fillRdo(UserRdo, user.convertToObject());
+      const userEntity = await this.authorizationService.register(dto);
+      return fillRdo(UserRdo, userEntity.convertToObject());
     } catch (error) {
       this.mapAuthErrorToHttp(error);
     }
   }
 
+  @Post('login')
   @ApiResponse({
-    type: LoggedUserRdo,
+    type: TokenPairRdo,
     status: HttpStatus.OK,
     description: 'User has been successfully logged.',
   })
@@ -52,32 +66,73 @@ export class AuthenticationController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Password or Login is wrong.',
   })
-  @Post('login')
-  public async login(@Body() dto: LoginUserDto) {
+  public async login(@Body() dto: LoginUserDto): Promise<TokenPairRdo> {
     try {
-      const user = await this.authorizationService.verify(dto);
-      return fillRdo(UserRdo, user.convertToObject());
+      const tokenPair = await this.authorizationService.login(dto);
+      return fillRdo(TokenPairRdo, tokenPair);
     } catch (error) {
       this.mapAuthErrorToHttp(error);
     }
   }
 
+  @Post('refresh-token')
+  @UseGuards(JwtRefreshGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    type: TokenPairRdo,
+    status: HttpStatus.OK,
+    description: 'Tokens have been successfully refreshed.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Refresh token is invalid or expired.',
+  })
+  public async refreshToken(
+    @Headers('authorization') authorization: string,
+    @Req() request: Request & { user: TokenPayload },
+  ): Promise<TokenPairRdo> {
+    try {
+      const refreshToken = authorization.replace('Bearer ', '');
+      const tokenPair = await this.authorizationService.refreshToken(
+        request.user,
+        refreshToken,
+      );
+      return fillRdo(TokenPairRdo, tokenPair);
+    } catch (error) {
+      this.mapAuthErrorToHttp(error);
+    }
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAccessGuard)
+  @ApiBearerAuth()
   @ApiResponse({
     type: UserRdo,
     status: HttpStatus.OK,
     description: 'User found',
   })
-  @Get(':id')
-  public async getById(@Param('id') id: string) {
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'User not found.',
+  })
+  public async getById(
+    @Param('id', MongoIdValidationPipe) id: string,
+  ): Promise<UserRdo> {
     try {
-      const user = await this.authorizationService.getById(id);
-      return fillRdo(UserRdo, user.convertToObject());
+      const userEntity = await this.authorizationService.getById(id);
+      return fillRdo(UserRdo, userEntity.convertToObject());
     } catch (error) {
       this.mapAuthErrorToHttp(error);
     }
   }
 
   private mapAuthErrorToHttp(error: unknown): never {
+    if (error instanceof RefreshTokenInvalidError) {
+      throw new UnauthorizedException(error.message);
+    }
+    if (error instanceof TokenGenerationError) {
+      throw new InternalServerErrorException(error.message);
+    }
     if (error instanceof UserExistsError) {
       throw new ConflictException(error.message);
     }

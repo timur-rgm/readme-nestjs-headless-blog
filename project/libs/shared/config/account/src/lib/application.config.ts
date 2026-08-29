@@ -24,7 +24,9 @@ const validateConfig = (config: unknown): ApplicationConfig => {
   });
 
   if (error) {
-    throw new Error(`[Application Config Validation Error]: ${error.message}`);
+    throw new Error(
+      `[Account Application Config Validation Error]: ${error.message}`,
+    );
   }
 
   return value;

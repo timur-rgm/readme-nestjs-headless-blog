@@ -1,8 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
 
 import { PostType } from '@project/types';
+import { CreateBasePostDto } from './create-base-post.dto';
 
-export class CreateVideoPostDto {
+export class CreateVideoPostDto extends CreateBasePostDto {
+  @IsEnum(PostType)
   @ApiProperty({
     description: 'Post type',
     example: PostType.Video,
@@ -10,20 +13,16 @@ export class CreateVideoPostDto {
   })
   public type!: PostType.Video;
 
-  @ApiProperty({
-    description: 'Post tags',
-    example: ['nestjs', 'blog'],
-    required: false,
-    isArray: true,
-  })
-  public tags?: string[];
-
+  @IsString()
+  @MinLength(20)
+  @MaxLength(50)
   @ApiProperty({
     description: 'Post title',
     example: 'My post',
   })
   public title!: string;
 
+  @IsUrl()
   @ApiProperty({
     description: 'Video URL',
     example: 'https://youtube.com/watch?v=123',

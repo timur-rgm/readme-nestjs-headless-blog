@@ -5,32 +5,36 @@ import type { Entity } from '@project/core';
 
 import { SALT_ROUNDS } from './authentication.constant';
 
-export class UserEntity implements AuthUser, Entity<string> {
+export class UserEntity implements AuthUser, Entity<string, AuthUser> {
   public id?: string;
   public email!: string;
   public name!: string;
   public avatarUrl?: string;
   public passwordHash!: string;
+  public refreshToken?: string;
 
   constructor(user: AuthUser) {
     this.fillFromObject(user);
   }
 
-  public convertToObject() {
+  public convertToObject(): AuthUser {
     return {
       id: this.id,
       email: this.email,
       name: this.name,
       avatarUrl: this.avatarUrl,
       passwordHash: this.passwordHash,
+      refreshToken: this.refreshToken,
     };
   }
 
   public fillFromObject(user: AuthUser): void {
+    this.id = user.id;
     this.email = user.email;
     this.name = user.name;
     this.avatarUrl = user.avatarUrl;
     this.passwordHash = user.passwordHash;
+    this.refreshToken = user.refreshToken;
   }
 
   public async setPassword(password: string): Promise<UserEntity> {

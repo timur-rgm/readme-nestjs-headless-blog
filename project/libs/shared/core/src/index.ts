@@ -1,4 +1,8 @@
-export { BaseMemoryRepository } from './lib/repository';
-export { BaseMongoRepository } from './lib/repository';
-export type { Entity, EntityId } from './lib/repository';
-export type { Repository } from './lib/repository';
+export {
+  BaseMemoryRepository,
+  BaseMongoRepository,
+  type Entity,
+  type EntityId,
+  type Repository,
+} from './lib/repository';
+export { MongoIdValidationPipe } from './lib/pipes';

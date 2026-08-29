@@ -60,6 +60,8 @@ export abstract class BaseMongoRepository<
       return null;
     }
 
-    return this.createEntity(document.toObject({ versionKey: false }));
+    return this.createEntity(
+      document.toObject({ versionKey: false, virtuals: true }),
+    );
   }
 }

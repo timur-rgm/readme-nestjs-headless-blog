@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiExtraModels,
@@ -18,15 +19,18 @@ import {
 import { fillRdo } from '@project/helpers';
 
 import type { CreatePostDto } from './dto/create-post.dto';
+import { CreatePostValidationPipe } from './pipes';
 import {
   LinkPostRdo,
   QuotePostRdo,
   PhotoPostRdo,
+  PostListRdo,
   PostRdo,
   TextPostRdo,
   VideoPostRdo,
 } from './rdo';
 import { PostExistsError, PostNotFoundError } from './errors';
+import { PostQuery } from './query/post.query';
 import { PostService } from './post.service';
 
 @Controller('posts')
@@ -34,6 +38,7 @@ import { PostService } from './post.service';
   LinkPostRdo,
   QuotePostRdo,
   PhotoPostRdo,
+  PostListRdo,
   TextPostRdo,
   VideoPostRdo,
 )
@@ -41,6 +46,7 @@ import { PostService } from './post.service';
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  @Post('/')
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'The new post has been successfully created.',
@@ -54,8 +60,13 @@ export class PostController {
       ],
     },
   })
-  @Post('/')
-  public async create(@Body() dto: CreatePostDto) {
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Post already exists.',
+  })
+  public async create(
+    @Body(new CreatePostValidationPipe()) dto: CreatePostDto,
+  ): Promise<PostRdo> {
     try {
       const post = await this.postService.create(dto, 'test-author-id');
       return fillRdo(PostRdo, post.convertToObject());
@@ -64,31 +75,21 @@ export class PostController {
     }
   }
 
+  @Get('/')
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Post list',
-    schema: {
-      type: 'array',
-      items: {
-        oneOf: [
-          { $ref: getSchemaPath(LinkPostRdo) },
-          { $ref: getSchemaPath(QuotePostRdo) },
-          { $ref: getSchemaPath(TextPostRdo) },
-          { $ref: getSchemaPath(PhotoPostRdo) },
-          { $ref: getSchemaPath(VideoPostRdo) },
-        ],
-      },
-    },
+    type: PostListRdo,
   })
-  @Get('/')
-  public async getAll() {
-    const posts = await this.postService.getAll();
-    return fillRdo(
-      PostRdo,
-      posts.map((post) => post.convertToObject()),
-    );
+  public async getAll(@Query() query?: PostQuery): Promise<PostListRdo> {
+    const posts = await this.postService.getAll(query);
+    return fillRdo(PostListRdo, {
+      ...posts,
+      entities: posts.entities.map((post) => post.convertToObject()),
+    });
   }
 
+  @Get('/:id')
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Post found',
@@ -102,8 +103,11 @@ export class PostController {
       ],
     },
   })
-  @Get('/:id')
-  public async getById(@Param('id') id: string) {
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Post not found.',
+  })
+  public async getById(@Param('id') id: string): Promise<PostRdo> {
     try {
       const post = await this.postService.getById(id);
       return fillRdo(PostRdo, post.convertToObject());

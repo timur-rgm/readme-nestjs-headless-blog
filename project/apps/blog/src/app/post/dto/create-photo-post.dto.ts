@@ -1,8 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsUrl } from 'class-validator';
 
 import { PostType } from '@project/types';
+import { CreateBasePostDto } from './create-base-post.dto';
 
-export class CreatePhotoPostDto {
+export class CreatePhotoPostDto extends CreateBasePostDto {
+  @IsEnum(PostType)
   @ApiProperty({
     description: 'Post type',
     example: PostType.Photo,
@@ -10,14 +13,7 @@ export class CreatePhotoPostDto {
   })
   public type!: PostType.Photo;
 
-  @ApiProperty({
-    description: 'Post tags',
-    example: ['nestjs', 'blog'],
-    required: false,
-    isArray: true,
-  })
-  public tags?: string[];
-
+  @IsUrl()
   @ApiProperty({
     description: 'Photo URL',
     example: '/images/photo.jpg',

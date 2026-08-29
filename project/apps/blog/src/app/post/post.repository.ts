@@ -1,11 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { Post as PrismaPost, PostType as PrismaPostType } from '@prisma/client';
+import {
+  Prisma,
+  Post as PrismaPost,
+  PostType as PrismaPostType,
+} from '@prisma/client';
 
-import { PostType } from '@project/types';
+import {
+  PaginationResult,
+  PostSortBy,
+  PostType,
+  SortDirection,
+} from '@project/types';
 import { PrismaClientService } from '@project/models';
 import type { EntityId, Repository } from '@project/core';
 
 import { PostEntity } from './post.entity';
+import { PostQuery } from './query/post.query';
+import {
+  POST_DEFAULT_LIMIT,
+  POST_DEFAULT_PAGE,
+  POST_DEFAULT_SORT_BY,
+  POST_DEFAULT_SORT_DIRECTION,
+} from './post.constant';
 
 const postTypeToPrismaPostType: Record<PostType, PrismaPostType> = {
   [PostType.Link]: PrismaPostType.Link,
@@ -13,6 +29,19 @@ const postTypeToPrismaPostType: Record<PostType, PrismaPostType> = {
   [PostType.Photo]: PrismaPostType.Photo,
   [PostType.Text]: PrismaPostType.Text,
   [PostType.Video]: PrismaPostType.Video,
+};
+
+const postSortByToPrismaOrderBy: Record<
+  PostSortBy,
+  (sortDirection: SortDirection) => Prisma.PostOrderByWithRelationInput
+> = {
+  [PostSortBy.CreatedAt]: (sortDirection) => ({ createdAt: sortDirection }),
+  [PostSortBy.Comments]: (sortDirection) => ({
+    comments: { _count: sortDirection },
+  }),
+  [PostSortBy.Likes]: (sortDirection) => ({
+    likes: { _count: sortDirection },
+  }),
 };
 
 @Injectable()
@@ -27,6 +56,51 @@ export class PostRepository implements Repository<PostEntity> {
     return this.mapPostRowToPostEntity(createdPostRow);
   }
 
+  public async findAll(
+    query?: PostQuery,
+  ): Promise<PaginationResult<PostEntity>> {
+    const {
+      limit = POST_DEFAULT_LIMIT,
+      page = POST_DEFAULT_PAGE,
+      sortBy = POST_DEFAULT_SORT_BY,
+      sortDirection = POST_DEFAULT_SORT_DIRECTION,
+      authorId,
+      tag,
+      type,
+    } = query ?? {};
+
+    const where: Prisma.PostWhereInput = {
+      authorId,
+      ...(tag && { tags: { has: tag } }),
+      ...(type && { type: postTypeToPrismaPostType[type] }),
+    };
+
+    const orderBy: Prisma.PostOrderByWithRelationInput =
+      postSortByToPrismaOrderBy[sortBy](sortDirection);
+
+    const skip = (page - 1) * limit;
+
+    const [postRows, totalItems] = await Promise.all([
+      this.prismaClientService.post.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      this.prismaClientService.post.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      entities: postRows.map((postRow) => this.mapPostRowToPostEntity(postRow)),
+      currentPage: page,
+      itemsPerPage: limit,
+      totalItems,
+      totalPages,
+    };
+  }
+
   public async findById(id: EntityId): Promise<PostEntity | null> {
     const existingPostRow = await this.prismaClientService.post.findUnique({
       where: { id },
@@ -37,15 +111,7 @@ export class PostRepository implements Repository<PostEntity> {
     return this.mapPostRowToPostEntity(existingPostRow);
   }
 
-  public async findAll(): Promise<PostEntity[]> {
-    const postRows = await this.prismaClientService.post.findMany();
-    return postRows.map((postRow) => this.mapPostRowToPostEntity(postRow));
-  }
-
-  public async update(
-    id: EntityId,
-    entity: PostEntity,
-  ): Promise<PostEntity> {
+  public async update(id: EntityId, entity: PostEntity): Promise<PostEntity> {
     const postData = entity.convertToObject();
     const updatedPostRow = await this.prismaClientService.post.update({
       where: { id },
@@ -120,49 +186,47 @@ export class PostRepository implements Repository<PostEntity> {
   }
 
   private mapPostRowToPostEntity(prismaPost: PrismaPost): PostEntity {
+    const basePost = {
+      id: prismaPost.id,
+      createdAt: prismaPost.createdAt,
+      updatedAt: prismaPost.updatedAt,
+      tags: prismaPost.tags,
+      authorId: prismaPost.authorId,
+    };
+
     switch (prismaPost.type) {
       case PrismaPostType.Link:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Link,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           linkUrl: prismaPost.linkUrl!,
-          description: prismaPost.description!,
+          description: prismaPost.description ?? undefined,
         });
       case PrismaPostType.Quote:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Quote,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           quote: prismaPost.quote!,
           quoteAuthor: prismaPost.quoteAuthor!,
         });
       case PrismaPostType.Photo:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Photo,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           photoUrl: prismaPost.photoUrl!,
         });
       case PrismaPostType.Text:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Text,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           title: prismaPost.title!,
           announce: prismaPost.announce!,
           text: prismaPost.text!,
         });
       case PrismaPostType.Video:
         return new PostEntity({
-          id: prismaPost.id,
+          ...basePost,
           type: PostType.Video,
-          tags: prismaPost.tags,
-          authorId: prismaPost.authorId,
           title: prismaPost.title!,
           videoUrl: prismaPost.videoUrl!,
         });

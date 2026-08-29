@@ -6,8 +6,10 @@ import {
   COMMENT_OWNERSHIP_REQUIRED,
 } from './comment.constant';
 import { CommentNotFoundError, CommentOwnershipError } from './errors';
+import { CommentQuery } from './query/comment.query';
 import { CommentRepository } from './comment.repository';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { PaginationResult } from '@project/types';
 import { PostService } from '../post/post.service';
 
 @Injectable()
@@ -25,9 +27,12 @@ export class CommentService {
     return this.commentRepository.save(entity);
   }
 
-  public async getByPostId(postId: string): Promise<CommentEntity[]> {
+  public async getByPostId(
+    postId: string,
+    query?: CommentQuery,
+  ): Promise<PaginationResult<CommentEntity>> {
     await this.postService.ensureExists(postId);
-    return this.commentRepository.findByPostId(postId);
+    return this.commentRepository.findByPostId(postId, query);
   }
 
   public async deleteById(id: string, userId: string): Promise<void> {

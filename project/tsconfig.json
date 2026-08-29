@@ -32,6 +32,9 @@
     },
     {
       "path": "./libs/blog/models"
+    },
+    {
+      "path": "./libs/shared/config/files"
     }
   ]
 }
